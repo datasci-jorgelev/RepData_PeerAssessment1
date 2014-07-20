@@ -4,7 +4,8 @@
 ## Loading and preprocessing the data
 
 
-```{r}
+
+```r
 activ <- read.csv("activity.csv", colClasses = c("numeric", "factor", "factor"))
 ```
 
@@ -13,54 +14,82 @@ activ <- read.csv("activity.csv", colClasses = c("numeric", "factor", "factor"))
 
 The total mean is:
 
-```{r computeMean}
+
+```r
 StepsPerDay <- tapply(activ$steps, activ$date, sum)
 mean(StepsPerDay, na.rm=T)
 ```
+
+```
+## [1] 10766
+```
 The total median is:
-```{r computeMedian}
+
+```r
 median(StepsPerDay, na.rm=T)
+```
+
+```
+## [1] 10765
 ```
 The histogram looks like this:
 
-```{r fig.height=4}
+
+```r
 hist(StepsPerDay, breaks=10)
 ```
+
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
 
 
 ## What is the average daily activity pattern?
 
-```{r fig.height=4}
+
+```r
 StepsPerInterval <- tapply(activ$steps, activ$interval, mean, na.rm = T)
 plot(StepsPerInterval, type="l")
+```
+
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
+
+```r
 maxSteps <- StepsPerInterval[StepsPerInterval == max(StepsPerInterval)]
 ```
-The maximum steps per interval is `r maxSteps`.
+The maximum steps per interval is 206.1698.
 
 
 
 ## Imputing missing values
 
-```{r numberofnas}
+
+```r
 numOfnas <- length(which(is.na(activ$steps)))
 ```
-The total of nas is `r numOfnas`.
+The total of nas is 2304.
 
 As we see in these pictures, the NAs are concentrate in eight days.
 
-```{r nasperday}
+
+```r
 NAsteps <- activ[is.na(activ$steps),]
 NAstepsPerDay <- tapply(NAsteps$date, NAsteps$date, length)
 plot(NAstepsPerDay)
+```
 
+![plot of chunk nasperday](figure/nasperday1.png) 
+
+```r
 NAstepsPerInterval <- tapply(NAsteps$interval, NAsteps$interval, length)
 plot(NAstepsPerInterval)
 ```
 
+![plot of chunk nasperday](figure/nasperday2.png) 
+
 
 So, I think is best to fill NAs with the mean of the interval, that we calculated before:
 
-```{r fig.height=4}
+
+```r
 noNAsactiv <- activ
 noNAsactivSteps <- apply(noNAsactiv, 1, function (x) if (is.na(x["steps"])) as.numeric(StepsPerInterval[x["interval"]]) else as.numeric(x["steps"]))
 
@@ -70,11 +99,18 @@ StepsPerDayNew <- tapply(noNAsactiv$steps, noNAsactiv$date, sum)
 hist(StepsPerDayNew, breaks=10)
 ```
 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
+
 
 The new mean is:
 
-```{r}
+
+```r
 mean(StepsPerDayNew, na.rm=T)
+```
+
+```
+## [1] 10766
 ```
 
 ... the same mean as before, because we used the average intervals for fill the NAs
@@ -82,7 +118,8 @@ mean(StepsPerDayNew, na.rm=T)
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r fig.height=10}
+
+```r
 activeDate <- strptime(as.character(activ$date), "%Y-%m-%d")
 activeDayWeek <- weekdays(activeDate)
 # This is necesary for use apply later...
@@ -106,8 +143,9 @@ par(mfrow=c(2,1))
 
 plot(StepsPerIntervalWeekday, type="l")
 plot(StepsPerIntervalWeekend, type="l")
-
 ```
+
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
 
 
 So... yes, the are differences between weedays and weekends. He/She is more active in weekends :)
