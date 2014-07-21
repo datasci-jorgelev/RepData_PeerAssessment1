@@ -53,9 +53,14 @@ plot(StepsPerInterval, type="l")
 ![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
 
 ```r
-maxSteps <- StepsPerInterval[StepsPerInterval == max(StepsPerInterval)]
+StepsPerInterval[StepsPerInterval == max(StepsPerInterval)]
 ```
-The maximum steps per interval is 206.1698.
+
+```
+##   835 
+## 206.2
+```
+The maximum steps per interval is 206.1698 , which corresponds to the interval 835.
 
 
 

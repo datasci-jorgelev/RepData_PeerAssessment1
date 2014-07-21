@@ -33,9 +33,9 @@ hist(StepsPerDay, breaks=10)
 ```{r fig.height=4}
 StepsPerInterval <- tapply(activ$steps, activ$interval, mean, na.rm = T)
 plot(StepsPerInterval, type="l")
-maxSteps <- StepsPerInterval[StepsPerInterval == max(StepsPerInterval)]
+StepsPerInterval[StepsPerInterval == max(StepsPerInterval)]
 ```
-The maximum steps per interval is `r maxSteps`.
+The maximum steps per interval is `r maxSteps` , which corresponds to the interval 835.
 
 
 
