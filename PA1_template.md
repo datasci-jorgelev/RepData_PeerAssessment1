@@ -7,63 +7,12 @@
 
 ```r
 library(lubridate)
+library(lattice)
 activity <- read.csv("activity.csv")
 ```
 
-Lets do some comprobations:
-
-How many NAs we have?
-
-
-```r
-colSums(is.na(activity))
-```
-
-```
-##    steps     date interval 
-##     2304        0        0
-```
-All of NAs are in the steps column.
-
-How are they distributed?
-
-
-```r
-nasPerDay <- with(activity, tapply(steps, date, function (x) sum(is.na(x))))
-barplot(nasPerDay, ylim = c(0, 300))
-```
-
-![plot of chunk NAsDistribution](figure/NAsDistribution.png) 
-
-It looks like all NAs are distributed in 8 days.
-
-
-```r
-nasPerDay[nasPerDay != 0]
-```
-
-```
-## 2012-10-01 2012-10-08 2012-11-01 2012-11-04 2012-11-09 2012-11-10 
-##        288        288        288        288        288        288 
-## 2012-11-14 2012-11-30 
-##        288        288
-```
-
-This turns important when we calculate the mean and the median, because we don't have any data in those days, we'll just ignore them.
-
-What about the intervals? 
 "...This device collects data at 5 minute intervals through out the day..."
-So, we should have 288 intervals per day (288 minutes x 5 = 1440 minutes = 24 hours) and the minimum and maximum value should be 0 and 1435 respectively:
-
-
-```r
-numberOfDays <- length(levels(activity$date))
-numberOfIntervalsPerDay <- with(activity, tapply(interval, date, length))
-correctDays <- length(numberOfIntervalsPerDay[numberOfIntervalsPerDay == 288])
-```
-We have 61  days and 61 days with 288 intervals.
-
-So each day has 288 intervals, but...
+So, we should have 288 intervals per day (288 minutes x 5 = 1440 minutes = 24 hours) and the minimum and maximum value should be 0 and 1435 respectively. Each day has 288 intervals, but the maximum value is not 1435.
 
 
 ```r
@@ -73,7 +22,7 @@ The range is 0, 2355 which it doesnt make sense for our purposes. Lets plot it:
 
 
 ```r
-plot(1:288, as.numeric(levels(factor(activity$interval))), type="l")
+plot(1:288, as.numeric(levels(factor(activity$interval))), type="l", xlab = "number of intervals", ylab = "minutes")
 ```
 
 ![plot of chunk wrongInterval](figure/wrongInterval.png) 
@@ -83,7 +32,7 @@ There are regular gaps between several pairs of intervals. Lets fix them with ne
 
 ```r
 activity$interval <- factor(activity$interval, labels=seq(0, by=5, length=288))
-plot(1:288, as.numeric(levels(activity$interval)), type="l")
+plot(1:288, as.numeric(levels(activity$interval)), type="l", xlab = "number of intervals", ylab = "minutes")
 ```
 
 ![plot of chunk fixingIntervals](figure/fixingIntervals.png) 
@@ -108,7 +57,7 @@ The histogram looks like this:
 
 
 ```r
-hist(stepsPerDay, col="blue", breaks=10)
+hist(stepsPerDay, col="blue", breaks=10, xlab = "Steps per day")
 ```
 
 ![plot of chunk newHistogram](figure/newHistogram.png) 
@@ -118,7 +67,7 @@ hist(stepsPerDay, col="blue", breaks=10)
 
 ```r
 stepsPerInterval <- with(activity, tapply(steps, interval, mean, na.rm=TRUE))
-plot(levels(activity$interval), stepsPerInterval, type="l")
+plot(levels(activity$interval), stepsPerInterval, type="l", xlab = "Minutes", ylab ="Steps per interval")
 ```
 
 ![plot of chunk activityPattern](figure/activityPattern.png) 
@@ -160,7 +109,7 @@ head(noNAsActivity)
 
 ```r
 noNAsStepsPerDay <- with(noNAsActivity, tapply(steps, date, sum))
-hist(noNAsStepsPerDay, col="green", breaks=10)
+hist(noNAsStepsPerDay, col="green", breaks=10, xlab = "Steps per day")
 ```
 
 ![plot of chunk missingValues](figure/missingValues.png) 
@@ -192,25 +141,16 @@ stepsPerIntervalWeekDay <- with(noNAsActivity[noNAsActivity$week == "weekday",],
 	tapply(steps, interval, mean))
 stepsPerIntervalWeekEnd <- with(noNAsActivity[noNAsActivity$week == "weekend",], 
 	tapply(steps, interval, mean))
-diffstepsInterval <- stepsPerIntervalWeekEnd - stepsPerIntervalWeekDay
 
-plot(levels(noNAsActivity$interval), stepsPerIntervalWeekDay, type="l")
+stepsPerInterval <- data.frame(interval = rep(seq(0, by=5, length=288), 2),
+	steps = c(stepsPerIntervalWeekDay, stepsPerIntervalWeekEnd), 
+	week = c(rep("weekday", 288), rep("weekend", 288)))
+
+xyplot(steps~interval | week, data = stepsPerInterval, layout = c(1,2), type="l")
 ```
 
-![plot of chunk weekdyasPatterns](figure/weekdyasPatterns1.png) 
-
-```r
-plot(levels(noNAsActivity$interval), stepsPerIntervalWeekEnd, type="l")
-```
-
-![plot of chunk weekdyasPatterns](figure/weekdyasPatterns2.png) 
+![plot of chunk weekdyasPatterns](figure/weekdyasPatterns.png) 
 
 
-So... yes, the are differences between weedays and weekends. He/She is more active in weekends :)
-
-
-
-
-
-
+So... yes, the are differences between weedays and weekends. He/She looks more active in weekends :)
 
